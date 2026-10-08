@@ -1,0 +1,21 @@
+# Analytics
+numpy==2.5.3
+pandas==3.0.6
+
+# Viz
+matplotlib==3.11.2
+seaborn==0.13.2
+
+# Machine learning
+scikit-learn==1.9.1
+xgboost==3.4.1
+
+# Jupyter Notebook
+notebook==7.6.3
+ipykernel==7.4.0
+
+# Experiment tracking
+mlflow==3.16.1
+
+# Data/model versioning
+dvc==3.67.1
