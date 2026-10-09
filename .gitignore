@@ -14,3 +14,6 @@ mlruns/
 
 # data
 /data/
+
+# outputs
+/outputs/
