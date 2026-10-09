@@ -5,11 +5,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from xgboost import XGBClassifier
 from sklearn.impute import SimpleImputer
-from config import (NUM_COLS, CAT_COLS, RANDOM_SEED, TARGET_VARIABLE,
+from src.config import (NUM_COLS, CAT_COLS, RANDOM_SEED, TARGET_VARIABLE,
                     N_ESTIMATORS, MAX_DEPTH, LEARNING_RATE, MIN_CHILD_WEIGHT,
                     SUBSAMPLE, SCALE_POS_WEIGHT, OBJECTIVE,EVAL_METRIC,
                     MODEL_FOLDER, TRACKING_URI, EXPERIMENT_NAME, RUN_NAME,
-                    CLEAN_DATA_PATH)
+                    CLEAN_DATA_PATH, MODEL_PATH, SPLITDATA_FOLDER)
 from sklearn.metrics import (accuracy_score, 
                              recall_score, 
                              precision_score,
@@ -34,6 +34,14 @@ def train():
             random_state=RANDOM_SEED,
             stratify=y
         )
+        # Save splitdata folder
+        SPLITDATA_FOLDER.mkdir(parents=True, exist_ok=True)
+        X_train.to_csv(SPLITDATA_FOLDER / "X_train.csv", index=False)
+        X_test.to_csv(SPLITDATA_FOLDER / "X_test.csv", index=False)
+        y_train.to_csv(SPLITDATA_FOLDER / "y_train.csv", index=False)
+        y_test.to_csv(SPLITDATA_FOLDER / "y_test.csv", index=False)
+
+        # training pipeline
         num_pipeline=Pipeline([
             ("imputer", SimpleImputer(strategy="median"))
         ])
@@ -55,16 +63,13 @@ def train():
             "subsample": SUBSAMPLE,
             "scale_pos_weight": SCALE_POS_WEIGHT,
             "objective": OBJECTIVE,
-            "eval_metrics": EVAL_METRIC,
+            "eval_metric": EVAL_METRIC,
             "random_state": RANDOM_SEED,
 
         }
         model_pipeline=Pipeline([
-            ("prepprocessor", preprocessor),
-            ("model", XGBClassifier(
-                params=params
-            ))
-        ])
+            ("preprocessor", preprocessor),
+            ("model", XGBClassifier(**params))])
         # logging params
         mlflow.log_params(params)
         # train and log models
@@ -88,7 +93,8 @@ def train():
             "test_f1": f1_test_score,
             "test_roc_auc": roc_auc_test_score
         })
-        joblib.dump(model_pipeline, MODEL_FOLDER/"churn_model.pkl")
+        MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(model_pipeline, MODEL_PATH)
 
 if __name__=="__main__":
     train()
