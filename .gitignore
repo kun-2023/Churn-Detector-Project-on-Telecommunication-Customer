@@ -1,19 +1,28 @@
 # virtual environment
 .churn_venv/
+.env
+.env.*
+!.env.example
+
 
 # Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
 # Jupyter
 .ipynb_checkpoints/
 
 # MLflow local artifacts
 mlruns/
+mlartifacts/
+mlflow.db
+mlflow.db-*
 
 
 # data
 /data/
 
 # outputs
-/outputs/
+/outputs/*
+!/outputs/frontend_data/

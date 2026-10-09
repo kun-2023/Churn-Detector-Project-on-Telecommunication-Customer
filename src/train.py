@@ -74,10 +74,12 @@ def train():
         mlflow.log_params(params)
         # train and log models
         model_pipeline.fit(X_train, y_train)
-        mlflow.sklearn.log_model(
+        model_info=mlflow.sklearn.log_model(
             sk_model=model_pipeline,
-            name="churn_model"
+            name="churn_model",
+            serialization_format="cloudpickle"
         )
+        print(f"Model URI: {model_info.model_uri}")
         # log metrics
         y_test_pred=model_pipeline.predict(X_test)
         y_test_proba=model_pipeline.predict_proba(X_test)[:,1]

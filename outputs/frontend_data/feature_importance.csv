@@ -1,0 +1,16 @@
+Feature,Importance
+cat__DeviceProtection_Yes,0.00901821
+cat__PaperlessBilling_No,0.009124897
+num__MonthlyCharges,0.009749271
+cat__PhoneService_No,0.010044293
+cat__MultipleLines_Yes,0.010714578
+cat__PaymentMethod_Electronic check,0.012782089
+num__tenure,0.014309048
+cat__Contract_One year,0.019261355
+cat__TechSupport_No,0.01934669
+cat__Contract_Two year,0.01939578
+cat__StreamingMovies_Yes,0.020611463
+cat__InternetService_DSL,0.02597844
+cat__OnlineSecurity_No,0.043521985
+cat__InternetService_Fiber optic,0.08753296
+cat__Contract_Month-to-month,0.57502526
