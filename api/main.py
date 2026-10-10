@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from api import routers
 
-app=FastAPI(title="CustomeChurnDetector")
+app=FastAPI(title="Customer Churn Detector")
 
 @app.get("/")
 def root():
