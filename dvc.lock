@@ -1,0 +1,78 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python -m src.preprocess
+    deps:
+    - path: data/data.csv
+      hash: md5
+      md5: 62eecb427f309d21bf8437018ace9012
+      size: 977499
+    - path: src/config.py
+      hash: md5
+      md5: 9f0eeabac4137f72ab7cee3c4b9da4e1
+      size: 1677
+    - path: src/preprocess.py
+      hash: md5
+      md5: 068539278eba1b2f71e3c92576050575
+      size: 499
+    outs:
+    - path: outputs/clean_data/clean_data.csv
+      hash: md5
+      md5: b7edbc91f1f3af1da91ea5bd29f98873
+      size: 892532
+  train:
+    cmd: python -m src.train
+    deps:
+    - path: outputs/clean_data/clean_data.csv
+      hash: md5
+      md5: b7edbc91f1f3af1da91ea5bd29f98873
+      size: 892532
+    - path: src/config.py
+      hash: md5
+      md5: 9f0eeabac4137f72ab7cee3c4b9da4e1
+      size: 1677
+    - path: src/train.py
+      hash: md5
+      md5: 9d80d83ff82b2d5ca3a9cbd25a77e6f4
+      size: 4043
+    outs:
+    - path: outputs/models/churn_model.pkl
+      hash: md5
+      md5: 72ff038dd4c4bd95e4cfde58d134f2ac
+      size: 260453
+  evaluate:
+    cmd: python -m src.evaluate
+    deps:
+    - path: outputs/clean_data/clean_data.csv
+      hash: md5
+      md5: b7edbc91f1f3af1da91ea5bd29f98873
+      size: 892532
+    - path: outputs/models/churn_model.pkl
+      hash: md5
+      md5: 72ff038dd4c4bd95e4cfde58d134f2ac
+      size: 260453
+    - path: src/config.py
+      hash: md5
+      md5: 9f0eeabac4137f72ab7cee3c4b9da4e1
+      size: 1677
+    - path: src/evaluate.py
+      hash: md5
+      md5: 51a5ae0a3a2dc8ea401facf8fcacd327
+      size: 2618
+    - path: src/inference.py
+      hash: md5
+      md5: d11e183a34b74a946264dc8f9df9ec57
+      size: 798
+    outs:
+    - path: outputs/frontend_data/confusion_matrix.csv
+      hash: md5
+      md5: 4fbcdfe79585b51d89c9dd83855dcf4f
+      size: 49
+    - path: outputs/frontend_data/feature_importance.csv
+      hash: md5
+      md5: 001e1834f2f6c4add13cfa19828e6708
+      size: 573
+    - path: outputs/frontend_data/metrics.csv
+      hash: md5
+      md5: da7e08ac8be2ac7d7e79647fd607f485
+      size: 127

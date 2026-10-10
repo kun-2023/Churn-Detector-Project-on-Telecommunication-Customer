@@ -24,5 +24,4 @@ mlflow.db-*
 /data/
 
 # outputs
-/outputs/*
-!/outputs/frontend_data/
+/outputs/

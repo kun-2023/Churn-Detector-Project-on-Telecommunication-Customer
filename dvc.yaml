@@ -1,0 +1,35 @@
+stages:
+  preprocess:
+    cmd: python -m src.preprocess
+    deps:
+      - src/preprocess.py
+      - src/config.py
+      - data/data.csv
+    outs:
+      - outputs/clean_data/clean_data.csv
+
+  train:
+    cmd: python -m src.train 
+    deps:
+      - src/config.py
+      - src/train.py
+      - outputs/clean_data/clean_data.csv
+    outs:
+      - outputs/models/churn_model.pkl
+
+  evaluate:
+    cmd: python -m src.evaluate
+    deps:
+      - src/inference.py
+      - src/evaluate.py
+      - src/config.py
+      - outputs/clean_data/clean_data.csv
+      - outputs/models/churn_model.pkl
+    outs:
+      - outputs/frontend_data/confusion_matrix.csv
+      - outputs/frontend_data/feature_importance.csv
+    metrics:
+      - outputs/frontend_data/metrics.csv:
+          cache: true
+
+  
