@@ -1,13 +1,31 @@
 ## Churn Detector Project on Telecommunication Customers
 
 
-#### navigate to the folder and create environment
+#### How to run apps on your local machine
 ```bash
+# 1. clone the repository
+git clone <repository-url>
+
+# 2. Navigate to folder
 cd churn_detector
-# create .churn_venv
+
+# 3. create .churn_venv
 python -m venv .churn_venv
-# activate the environment
+
+# 4. activate the environment
 source .churn_venv/Scripts/activate
+
+# 5. Install dependencies
+pip install -r requirements.txt
+
+# 6. clone .env file
+cp .env.example .env
+
+# 7. Download models and data from DVC remote
+dvc pull
+
+# 8. Start the FastAPI application
+uvicorn api.main:app --reload
 ```
 #### Turn on MLflower server before re-training models
 ```bash

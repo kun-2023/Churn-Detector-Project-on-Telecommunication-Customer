@@ -19,3 +19,6 @@ mlflow==3.16.1
 
 # Data/model versioning
 dvc[s3]==3.67.1
+
+# dotenv
+python-dotenv

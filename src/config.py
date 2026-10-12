@@ -16,7 +16,11 @@ Y_TEST_PATH=SPLITDATA_FOLDER/"y_test.csv"
 
 # Variables
 NUM_COLS=['SeniorCitizen', 'tenure', 'MonthlyCharges', 'TotalCharges']
-CAT_COLS=['gender', 'Partner', 'Dependents', 'PhoneService', 'MultipleLines', 'InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract', 'PaperlessBilling', 'PaymentMethod']
+CAT_COLS=['gender', 'Partner', 'Dependents', 'PhoneService', 
+          'MultipleLines', 'InternetService', 'OnlineSecurity',
+        'OnlineBackup', 'DeviceProtection', 'TechSupport', 
+        'StreamingTV', 'StreamingMovies', 'Contract', 
+        'PaperlessBilling', 'PaymentMethod']
 RANDOM_SEED=42
 TARGET_VARIABLE="Churn_Label"
 

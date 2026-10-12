@@ -2,17 +2,15 @@ import pandas as pd
 import joblib
 from pathlib import Path
 
-BASE_DIR=Path(__file__).resolve().parents[1]
+from api.settings import MODEL_PATH
 
-MODELS_DIR=BASE_DIR/"outputs/models"
-CHURN_MODEL_PATH=MODELS_DIR/"churn_model.pkl"
 
 def load_churn_model():
-    if not CHURN_MODEL_PATH.exists():
+    if not MODEL_PATH.exists():
         raise FileNotFoundError(
-            f"Risk model file not found at: {CHURN_MODEL_PATH}"
+            f"Risk model file not found at: {MODEL_PATH}"
         )
-    model=joblib.load(CHURN_MODEL_PATH)
+    model=joblib.load(MODEL_PATH)
     return model
 
 def predict_churn(data: dict):
