@@ -2,7 +2,7 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 
-ROOT_FOLDER=Path(__file__).resolve().parent[1]
+ROOT_FOLDER=Path(__file__).resolve().parents[1]
 
 def show_overview():
     st.title("Telecommunication Customers Churn Detector")

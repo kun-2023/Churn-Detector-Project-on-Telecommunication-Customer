@@ -9,8 +9,8 @@ stages:
       size: 977499
     - path: src/config.py
       hash: md5
-      md5: 9f0eeabac4137f72ab7cee3c4b9da4e1
-      size: 1677
+      md5: 9e5d4ccd398abe7f8c3221a726899e37
+      size: 1718
     - path: src/preprocess.py
       hash: md5
       md5: 068539278eba1b2f71e3c92576050575

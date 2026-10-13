@@ -32,11 +32,11 @@ precision_test_score=precision_score(y_test, y_test_pred)
 f1_test_score=f1_score(y_test, y_test_pred)
 roc_auc_test_score=roc_auc_score(y_test, y_test_proba)
 df_test_metrics=pd.DataFrame({
+    "metrics": ["Accuracy", "Recall", "Precision", "F1_score", "ROC_AUC_SCORE"],
     "test_scores":[accuracy_test_score, 
                    recall_test_score, 
                    precision_test_score,
-                   f1_test_score, roc_auc_score]
-}, index=["Accuracy", "Recall", "Precision", "F1_score", "ROC_AUC_SCORE"])
+                   f1_test_score, roc_auc_test_score]})
 
 # feature importances
 feature_names=predictor.model.named_steps["preprocessor"].get_feature_names_out()

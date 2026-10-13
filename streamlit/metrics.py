@@ -17,18 +17,50 @@ df_confusion_matrix=pd.read_csv(confusion_matrix_path, index_col=0)
 def show_metrics():
     st.title("Model Performance Metrics")
     st.subheader("Metrics")
-    st.dataframe(df_metrics, use_container_width=True)
+    scores=df_metrics.set_index("metrics")["test_scores"].astype(float)
+    metric_names=[
+        "Accuracy", 
+        "Recall",
+        "Precision", 
+        "F1_score", 
+        "ROC_AUC_SCORE"
+    ]
+
+    cols=st.columns(5)
+    for col, name in zip(cols, metric_names):
+        with col:
+            st.metric(
+                label=name.replace("_", " "),
+                value=f"{scores[name]:.3f}"
+            )
 
     st.subheader("Feature Importance")
-    st.bar_chart(
-        df_feature_importance,
-        x="feature",
-        y="importance",
-        horizontal=True
+    importance=df_feature_importance.copy()
+    importance.columns=importance.columns.str.lower()
+    importance=(
+        importance.sort_values(
+            "importance", ascending=False
+        ).head(15)
     )
+    fig, ax=plt.subplots(figsize=(11,7))
+    ax.barh(
+        importance["feature"],
+        importance["importance"]
+    )
+    ax.invert_yaxis()
+    ax.set_xlabel("Importance")
+    ax.set_ylabel("")
+
+    ax.tick_params(axis="y", labelsize=9)
+    fig.subplots_adjust(left=0.46, 
+                        right=0.97, 
+                        top=0.50, 
+                        bottom=0.19)
+    st.pyplot(fig, width="stretch")
+    plt.close(fig)
 
     st.subheader("Testing Data Confusion Matrix")
-    fig, ax=plt.subplots(figsize=(6,4))
+    fig, ax=plt.subplots(figsize=(4,3))
     sns.heatmap(df_confusion_matrix, annot=True,
                 fmt="d", cmap="Blues", cbar=False,
                 ax=ax)
