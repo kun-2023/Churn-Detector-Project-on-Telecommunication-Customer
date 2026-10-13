@@ -44,7 +44,7 @@ docker compose down
 ```bash
 # Enter those commands in bash
 # 1 Clone the repo
-git clone <repository-url>
+git clone https://github.com/kun-2023/Churn-Detector-Project-on-Telecommunication-Customer.git
 
 # 2 Navigate to the folder
 cd churn_detector
