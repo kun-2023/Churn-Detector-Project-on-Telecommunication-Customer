@@ -1,9 +1,9 @@
 ## Churn Detector Project on Telecommunication Customers
 ### Project Overview
-1. The project is to making an pp that predict customer churn for a telecommunication company, so the firm would be able to identify potential churned customers
-2. The app demostrates Visualized analysis of the customers data to showcase customers who are likely to churn and features that are most correlated to the churn. It also displays model metrics performances. Finally it will allow users to make churn predictions by entering information about customers
-3. Tech Stack: Python, Scikit-learn, Xgboost, FastAPI, DVC, MLflow, Streamlit, AWS ECR, ECS, Pytest, Git/Github, GitHub Action
-4. Automation pipelines: 1. MLflow + DVC training piple. It allows automatica model retraining by typing `dvc repro` in bash; 2. CI/CD pipeline. It allows reintegration and redeployment of the application by simplely typing `git push` in bash.
+1. The project is an **end-to-end Machine Learning** churn detector application. The app can predict customer who would leave the service in advance, so the firm would be able to identify potential churned customers
+2. The app demostrates **Visualized analysis** of the customers data to showcase customers who are likely to churn and features that are most correlated to the churn. It also displays **model performances metrics**. Finally it will allow users to make churn predictions by entering information about customers
+3. Tech Stack: **Python**, **Scikit**-learn, **Xgboost**, **FastAPI**, **DVC**, **MLflow**, **Streamlit**, **AWS ECR**, **ECS**, **Pytest**, **Git/Github**, **GitHub Action**
+4. Automation pipelines: 1. **MLflow + DVC** training piple. It allows automatica model retraining by typing `dvc repro` in bash; 2. **CI/CD** pipeline. It allows **reintegration and redeployment** of the application by simplely typing `git push` in bash.
 
 ### How to run apps on your local machine
 #### Option 1: Run with Docker (Recommended)

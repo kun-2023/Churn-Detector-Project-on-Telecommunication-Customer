@@ -9,6 +9,16 @@ st.set_page_config(
     layout="wide"
 )
 
+# Styling the button
+
+# GitHub repository button
+st.sidebar.link_button(
+    "Go to GitHub Repo",
+    "https://github.com/kun-2023/Churn-Detector-Project-on-Telecommunication-Customer",
+    type="primary"
+)
+
+
 st.markdown(
     """
     <style>
