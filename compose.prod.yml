@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
 
   streamlit:
-    image: "${ECR_REGISTRY:?Set ECR_REGISTRY}/churn-detecttor-streamlit:${IMAGE_TAG:-latest}"
+    image: "${ECR_REGISTRY:?Set ECR_REGISTRY}/churn-detector-streamlit:${IMAGE_TAG:-latest}"
     ports:
       - "8503:8501"
     environment:
