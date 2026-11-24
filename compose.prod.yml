@@ -1,0 +1,14 @@
+services:
+  api:
+    image: "${ECR_REGISTRY:?Set ECR_REGISTRY}/churn-detector-api:${IMAGE_TAG:-latest}"
+    restart: unless-stopped
+
+  streamlit:
+    image: "${ECR_REGISTRY:?Set ECR_REGISTRY}/churn-detecttor-streamlit:${IMAGE_TAG:-latest}"
+    ports:
+      - "8503:8501"
+    environment:
+      API_BASE_URL: "http://api:8000"
+    depends_on:
+      - api
+    restart: unless-stopped

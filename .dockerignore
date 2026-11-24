@@ -1,7 +1,7 @@
 .git/
 .dvc/cache/
 
-./churn_venv
+churn_venv/
 .venv/
 
 __pycache__/

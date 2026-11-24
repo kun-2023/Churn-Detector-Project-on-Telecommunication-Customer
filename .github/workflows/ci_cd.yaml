@@ -4,21 +4,27 @@ on:
   push:
     branches:
       - main
-  
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: churn-lightsail
+  cancel-in-progress: false
 
 env:
   AWS_REGION: ca-central-1
   ECR_API_REPOSITORY: churn-detector-api
   ECR_STREAMLIT_REPOSITORY: churn-detector-streamlit
-  ECS_CLUSTER: churn-detector-cluster
-  ECS_SERVICE: churn-detector-service
+  
 
 jobs:
   # CI
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
     - name: checkout repository
@@ -32,9 +38,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-api.txt
-        pip install pytest httpx
-        pip install "dvc[S3]"
+        python -m pip install -r requirements-api.txt
+        python -m pip install pytest httpx "dvc[S3]"
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -43,7 +48,7 @@ jobs:
         aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
         aws-region: ${{env.AWS_REGION}}
 
-    - name: Pull API model with DVC
+    - name: Download model
       run: |
         dvc pull outputs/models/churn_model.pkl
 
@@ -54,9 +59,16 @@ jobs:
     # CD
 
   deploy:
-    name: Build and Deploy
-    runs-on: ubuntu-latest
+    name: Build and Deploy to Lightsail
     needs: test
+    if: github.ref=='refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      LIGHTSAIL_HOST: ${{secrets.LIGHTSAIL_HOST}}
+      LIGHTSAIL_SSH_KEY: ${{secrets.LIGHTSAIL_SSH_KEY}}
+      LIGHTSAIL_KNOWN_HOSTS: ${{secrets.LIGHTSAIL_KNOWN_HOSTS}}
 
     steps:
       - name: Checkout repository
@@ -69,7 +81,7 @@ jobs:
 
       - name: Install DVC
         run: |
-          pip install "dvc[s3]"
+          python -m pip install "dvc[s3]"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -78,47 +90,107 @@ jobs:
           aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           aws-region: ${{env.AWS_REGION}}
       
-      - name: Pull API model with DVC
+      - name: Download model and frontend data
         run: |
           dvc pull outputs/models/churn_model.pkl
-
-      - name: Pull streamlit frontend_data with DVC
-        run: |
           dvc pull outputs/frontend_data/metrics.csv
           dvc pull outputs/frontend_data/confusion_matrix.csv
           dvc pull outputs/frontend_data/feature_importance.csv
-        
-      - name: Pull clean_data with DVC
-        run: |
           dvc pull outputs/clean_data/clean_data.csv
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build API Image
+      - name: Build and push images
+        env:
+          ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
         run: |
           docker build \
-            -f Dockerfile.api -t ${{steps.login-ecr.outputs.registry}}/${{env.ECR_API_REPOSITORY}}:latest .
+            -f Dockerfile.api -t "$ECR_REGISTRY/$ECR_API_REPOSITORY:$GITHUB_SHA" .
 
-      - name: Push API Image
-        run: |
-          docker push ${{steps.login-ecr.outputs.registry}}/${{env.ECR_API_REPOSITORY}}:latest
+          docker push "$ECR_REGISTRY/$ECR_API_REPOSITORY:$GITHUB_SHA"
 
-      - name: Build Streamlit Image
-        run: |
-          docker build -f Dockerfile.streamlit -t ${{steps.login-ecr.outputs.registry}}/${{env.ECR_STREAMLIT_REPOSITORY}}:latest .
+          docker build -f Dockerfile.streamlit -t "$ECR_REGISTRY/$ECR_STREAMLIT_REPOSITORY:$GITHUB_SHA" .
 
-      - name: Push Streamlit Image
+           docker push "$ECR_REGISTRY/$ECR_STREAMLIT_REPOSITORY:$GITHUB_SHA"
+    
+      - name: Configure SSH
         run: |
-          docker push ${{steps.login-ecr.outputs.registry}}/${{env.ECR_STREAMLIT_REPOSITORY}}:latest
+          install -d -m 700 ~/.ssh
 
-      # ECS Deployment
-      - name: Force ECS Deployment
+          printf '%s\n' "$LIGHTSAIL_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          printf '%s\n' "$LIGHTSAIL_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+          printf '%s\n' \
+            "Host lightsail" \
+            "  HostName $LIGHTSAIL_HOST" \
+            "  User ubuntu" \
+            "  IdentityFile ~/.ssh/deploy_key" \
+            "  IdentitiesOnly yes" \
+            "  BatchMode yes" \
+            "  StrictHostKeyChecking yes" \
+            "  ConnectTimeout 15" \
+            > ~/.ssh/config
+
+          chmod 600 ~/.ssh/config
+
+      - name: Copy production configuration
         run: |
-          aws ecs update-service \
-            --cluster ${{env.ECS_CLUSTER}} \
-            --service ${{env.ECS_SERVICE}} \
-            --desired-count 1 \
-            --force-new-deployment \
-            --region ${{env.AWS_REGION}}
+          ssh lightsail "mkdir -p /home/ubuntu/churn-detector"
+
+          scp compose.prod.yml \
+            lightsail:/home/ubuntu/churn-detector/compose.prod.yml
+
+      - name: Authenticate Lightsail Docker to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          aws ecr get-login-password --region "$AWS_REGION" |
+            ssh lightsail \
+              "sudo -n docker login --username AWS --password-stdin '$ECR_REGISTRY'"
+
+      - name: Start containers
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          ssh lightsail \
+            bash -s -- "$ECR_REGISTRY" "$GITHUB_SHA" <<'REMOTE'
+          set -euo pipefail
+
+          cd /home/ubuntu/churn-detector
+          umask 077
+
+          printf 'ECR_REGISTRY=%s\nIMAGE_TAG=%s\n' \
+            "$1" "$2" > .env.deploy
+
+          compose=(
+            sudo -n docker compose
+            -p churn-detector
+            --env-file .env.deploy
+            -f compose.prod.yml
+          )
+
+          "${compose[@]}" config --quiet
+          "${compose[@]}" pull
+          "${compose[@]}" up -d --no-build
+
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --max-time 5 \
+              http://127.0.0.1:8503/_stcore/health; then
+              "${compose[@]}" ps
+              exit 0
+            fi
+            sleep 2
+          done
+
+          "${compose[@]}" logs --tail 80
+          exit 1
+          REMOTE
+
+      - name: Remove SSH private key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
